@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hilabs chat bot</title>
+    <script>
+        function getSessionKey() {
+            fetch('/get-session-key', {
+                method: 'GET',
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => alert('Session Key:', data))
+            .catch(error => alert('Error fetching session key:', error));
+        }
+
+        function uploadPDF(event) {
+            event.preventDefault();
+            const formData = new FormData();
+            const pdfFile = document.getElementById('pdf-file').files[0];
+            formData.append('pdf', pdfFile);
+
+            fetch('/upload-pdf', {
+                method: 'POST',
+                body: formData,
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => alert('PDF Upload Response:', data))
+            .catch(error => alert('Error uploading PDF:', error));
+        }
+
+        // Function to process PDF
+        function processPDF() {
+            fetch('/process-pdf', {
+                method: 'GET',
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => alert('Process PDF Response:', data))
+            .catch(error => alert('Error processing PDF:', error));
+        }
+
+        const messages = [];
+
+        // Function to handle question submission
+        function askQuestion(event) {
+            event.preventDefault();
+            const question = document.getElementById('question').value;
+
+            fetch('/ask-question', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({ question: question })
+            })
+            .then(response => response.json())
+            .then(data => {
+                messages.push({ question, response: data.response });
+                document.getElementById('chats').innerText = messages.map(message => `${message.question} - ${message.response}`).join('\n\n\n\n');
+            })
+            .catch(error => alert('Error asking question:', error));
+        }
+
+        window.onload = getSessionKey;
+    </script>
+</head>
+<body>
+    <h1>Hilabs Chat Bot</h1>
+    
+    <form id="pdf-upload-form" onsubmit="uploadPDF(event)">
+        <label for="pdf-file">Upload PDF:</label>
+        <input type="file" id="pdf-file" name="pdf" accept="application/pdf" required>
+        <button type="submit">Upload PDF</button>
+    </form>
+
+    <button onclick="processPDF()">Process PDF</button>
+
+    <form id="question-form" onsubmit="askQuestion(event)">
+        <label for="question">Ask a Question:</label>
+        <input type="text" id="question" name="question" required>
+        <button type="submit">Submit Question</button>
+    </form>
+
+    <h2>Chats:</h2>
+    <p id="chats"></p>
+</body>
+</html>

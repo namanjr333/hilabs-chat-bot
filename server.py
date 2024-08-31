@@ -1,5 +1,5 @@
 import os
-from flask import Flask, session, request, jsonify
+from flask import Flask, session, request, jsonify, render_template
 from werkzeug.utils import secure_filename
 from rag import create_vector_store, add_documents_to_vector_store, get_documents, get_answer
 
@@ -14,6 +14,10 @@ if not os.path.exists(UPLOAD_FOLDER):
     
 db = {}
 
+@app.route('/')
+def home():
+    return render_template('index.html')
+
 @app.route('/get-session-key', methods=['GET'])
 def get_session_key():
     import uuid
@@ -21,7 +25,8 @@ def get_session_key():
     session['key'] = session_key
     db[session_key] = {
         'vector_store': create_vector_store(),
-        'pdf_paths': []
+        'pdf_paths': [],
+        'mssgs': []
     }
     return jsonify({'message': 'Session key set successfully'}), 200
 
@@ -36,8 +41,11 @@ def upload_pdf():
         return jsonify({'error': 'No selected file'}), 400
     
     if file and file.filename.endswith('.pdf'):
+        dir_path = os.path.join(app.config['UPLOAD_FOLDER'], session['key'])
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
         filename = secure_filename(file.filename)
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file_path = os.path.join(dir_path, filename)
         file.save(file_path)
         db[session['key']]['pdf_paths'].append(file_path)
         return jsonify({'message': 'File uploaded successfully', 'filename': filename}), 200
@@ -49,7 +57,7 @@ def process_pdf():
     vector_store = db[session['key']]['vector_store']
     file_path = db[session['key']]['pdf_paths'][0]
     docs = get_documents(file_path)
-    add_documents_to_vector_store(vector_store, docs[:20])
+    add_documents_to_vector_store(vector_store, docs[:3])
     return jsonify({'message': 'PDF processed successfully'}), 200
     
 
@@ -58,7 +66,16 @@ def ask_question():
     vector_store = db[session['key']]['vector_store']
     question = request.json['question']
     response = get_answer(vector_store, question)
+    db[session['key']]['mssgs'].append({
+        'question': question,
+        'response': response
+    })
     return jsonify({'response': response}), 200
+
+@app.route('/get-messages', methods=['GET'])
+def get_messages():
+    mssgs = db[session['key']]['mssgs']
+    return jsonify({'messages': mssgs}), 200
 
 
 if __name__ == '__main__':
