@@ -30,7 +30,7 @@ def add_documents_to_vector_store(vector_store: FAISS, docs):
     vector_store.add_documents(documents=docs)
     
 def get_answer(vector_store, question):
-    results = vector_store.similarity_search(query=question, k=100)
+    results = vector_store.similarity_search(query=question, k=10000)
     context_str = ""
     for doc in results:
         context_str += doc.page_content
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     docs = get_documents("Samples/Contract 1.pdf")
     print("Documents Loaded", len(docs))
 
-    add_documents_to_vector_store(vector_store, docs[:3])
+    add_documents_to_vector_store(vector_store, docs)
     print("Documents Added to Vector Store")
 
     response = get_answer(vector_store, question)

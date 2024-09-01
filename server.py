@@ -57,7 +57,7 @@ def process_pdf():
     vector_store = db[session['key']]['vector_store']
     file_path = db[session['key']]['pdf_paths'][0]
     docs = get_documents(file_path)
-    add_documents_to_vector_store(vector_store, docs[:3])
+    add_documents_to_vector_store(vector_store, docs)
     return jsonify({'message': 'PDF processed successfully'}), 200
     
 
