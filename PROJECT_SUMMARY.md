@@ -162,8 +162,8 @@ hilabs-chat-bot/
   - Returns generated answer
 
 **LLM Configuration**:
-- Model: llama3.1
-- Embeddings: llama3.1
+- Model: llama-3.1
+- Embeddings: llama-3.1
 - Temperature/Parameters: Default Ollama settings
 
 ### 3. templates/index.html (Web Interface)
@@ -324,8 +324,8 @@ The project includes:
 
 ## 📊 Project Statistics
 
-- **Total Lines of Code**: ~338 lines (server.py + rag.py + index.html)
-- **Dependencies**: 23 Python packages
+- **Total Lines of Code**: 338 lines (server.py: 82, rag.py: 56, index.html: 200)
+- **Dependencies**: 22+ Python packages
 - **Sample Documents**: 15 contract PDFs
 - **API Endpoints**: 6 endpoints
 - **Core Functions**: 5 main functions in rag.py
